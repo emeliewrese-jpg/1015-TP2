@@ -8,6 +8,7 @@
 # des descriptions fournies dans les specs du TP2 pour le cours IFT1015-A25.
 
 import functools
+import codeboot
 
 # Procédure qui vérifie si les indices de lignes et de colonnes sont valides. 
 # À appeler dans chaque fonctions/procédures qui suit.
@@ -24,23 +25,34 @@ def my_deepcopy(tab):
 
 # Sauvegarde la table data dans un fichier CSV situé à l'emplacement file_path.
 def save_data(data, file_path):
-    pass
+    text = ''
+    for ligne in data:
+        text += ','.join(ligne) + '\n'
+
+    return codeboot.download(file_path, text)
 
 # Convertit le texte CSV csvtext en une structure de données qui représente la 
 # table.
 def csvtxt_to_data(csvtext):
-    pass
+    lines = csvtext.split('\r\n')     # seulement nécessaire pour moi que je travaille avec windows, mette \n pour unix
+    if lines[-1] == '' : lines.pop()
+    return lines
 
 # Crée et retourne un tableau de textes du format 'colonne x' oû x est le 
 # numéro de la colonne pour num_cols (int) colonnes (avec 1 = la première 
 # colonne).
 def create_empty_data_header(num_cols):
-    pass
+    header = []
+    for i in range(num_cols):
+        header.append(f'Colonne {i+1}')
+    return header
+
 
 # Crée et retourne un tableau de tableaux de tetes représentant une table vide 
 # avec num_cols (int) colonnes et num_rows (int) lignes.
-def create_empty_data(num_cols, num_rows):
-    pass
+def create_empty_data(num_rows, num_cols):
+    return matrices(num_rows, num_cols, '')
+    
 
 # Crée et retourne un nouvel en-tête de colonne en insérante une nouvelle 
 # colonne à la position col_idx dans l'en-tête header. Le nom de la nouvelle
@@ -58,7 +70,8 @@ def create_new_column(data, col_idx):
 # row_idx dans la table data. Les cellules de la nouvelle ligne sont initialisée
 # à des textes vides.
 def create_new_row(data, row_idx):
-    pass
+    data.insert(row_idx-1, ['']*len(data[0]))
+    return data
 
 # Crée et retourne un nouvel en-tête de colonne en supprimant la colonne à la 
 # position col_idx dans l'en-tête header.

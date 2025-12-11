@@ -5,7 +5,7 @@ import spreadsheet
 import codeboot
 from pymsgbox import prompt
 from pymsgbox import alert
-from spreadsheet import matrices
+from spreadsheet import matrices, update_cell, save_data, csvtxt_to_data, create_empty_data_header, create_empty_data, create_new_row
 from codeboot import write_file
 
 
@@ -37,17 +37,17 @@ def header(nb_col):
     return header
 
 
-def header_mat(nb_col):
-    header = []
-    for i in range(nb_col):
-        header.append(f'Colonne {i+1}')
-    return header
+#def header_mat(nb_col):
+    #header = []
+    #for i in range(nb_col):
+        #header.append(f'Colonne {i+1}')
+    #return header
 
 # il faut se définir une équivalence entre une matrice et la table html qui est affichée.
 
-current_sheet = matrices(40,20,'')   # une matrice
+current_sheet = create_empty_data(40,20)   # une matrice
 current_header = header(20)          # un text, c'est pas très cute d'avoir 2 type différents ici
-current_header_mat = header_mat(20)
+current_header_mat = create_empty_data_header(20)
 
 # On va faire nos manipulations sur current_sheet, on va ensuite vouloir les transférer vers le doc html ?
 # per_head est un booléen disant s'il y a un header personnalisé à inclure ou simplement un header classique 
@@ -79,11 +79,11 @@ def read_csv(path):
     pass
 
 # inspiré du code des ndc de Marc Feeley
-def write_csv(tab):
-    text = ''
-    for ligne in tab:
-        text += ','.join(ligne) + '\n'
-    return text
+#def write_csv(tab):
+    #text = ''
+    #for ligne in tab:
+        #text += ','.join(ligne) + '\n'
+    #return text
 
 
 # I haven't actually used these, maybe they could be good pour éviter de la répétition de code ?
@@ -131,16 +131,19 @@ def cell_clicked(row_idx, col_idx):          # à compléter
 # zone de téléversement dans l'interface graphique, qui est simplement tout le
 # body de la page.
 def drop_file(files):
-    global current_sheet, current_header
+    global current_sheet, current_header_mat
 
     for file in files:
         name = file.filename  # le programme ne trouve pas filename ?
         content = file.content 
                              
     document.querySelector('#file-name').innerHTML = name
-    lines = content.split('\r\n')     # seulement nécessaire pour moi que je travaille avec windows, mette \n pour unix
 
-    if lines[-1] == '' : lines.pop()
+    #lines = content.split('\r\n')     # seulement nécessaire pour moi que je travaille avec windows, mette \n pour unix
+
+    #if lines[-1] == '' : lines.pop()
+
+    lines = csvtxt_to_data(content)
              
     # on veut lire le content et l'afficher dans une table appropriée.
     
@@ -152,10 +155,11 @@ def drop_file(files):
 
     if h == len(maybe_titles) : 
         current_sheet = list(map(lambda x: x.split(','), lines[1:]))
-        current_header = maybe_titles
+        current_header_mat = maybe_titles
         update_table_html(current_sheet, True)
     else :
         current_sheet = list(map(lambda x: x.split(','), lines))
+        current_header_mat = create_empty_data_header(len(maybe_titles))
         update_table_html(current_sheet, False)
 
 
@@ -173,14 +177,15 @@ text = ''
 # la touche enfoncée, accessible via le champ event.key. Si la touche pressée 
 # est "Enter", la modification de la cellule doit être sauvegardée.
 def cell_editor_pressed(event):
-    global text
+    global text, current_sheet, current_header_mat, selected_cell
     if event.key == "Enter" :
         selected_cell.innerHTML = text
 
         row = working_selected_cell.r
         col = working_selected_cell.c
         if row != -1:
-            current_sheet[row-1][col-1] = text
+            #current_sheet[row-1][col-1] = text
+            current_sheet = update_cell(current_sheet, row-1, col-1, text)
         else : current_header_mat[col] = text
 
         text = ''
@@ -203,7 +208,7 @@ def cell_editor_pressed(event):
 # créer une nouvelle table vide et l'afficher dans l'interface graphique. Une 
 # table vide contient par définitions 20 colonnes et 40 lignes.
 def new_sheet_button_clicked():
-    current_sheet = matrices(40,20,'')
+    current_sheet = create_empty_data(40,20)
     update_table_html(current_sheet, False)
     document.querySelector('#file-name').innerHTML = 'Aucun fichier chargé'
     document.querySelector('#selected-cell').innerHTML = '(X,X)'
@@ -219,8 +224,9 @@ def save_sheet_button_clicked():
     nom_fichier = prompt('Nom du fichier')
     # quelque chose qui transforme la table de données actuelles en csv : write csv
     if nom_fichier != None:
-        text = write_csv(current_sheet)
-        codeboot.download(nom_fichier, text)
+        save_data(current_sheet, nom_fichier)
+        #text = write_csv(current_sheet)
+        #codeboot.download(nom_fichier, text)
         document.querySelector('#file-name').innerHTML = nom_fichier
         alert('Fichier téléchargé!')    
 
@@ -237,7 +243,8 @@ def save_sheet_button_clicked():
 def add_row_before_button_clicked():
     global current_sheet, current_header_mat
     row = working_selected_cell.r
-    current_sheet.insert(row-1, ['']*len(current_header_mat))
+    #current_sheet.insert(row-1, ['']*len(current_header_mat))
+    current_sheet = create_new_row(current_sheet, row)
     update_table_html(current_sheet, True)
 
 # Gère l'évènement de clic sur le bouton "Ajouter ligne après". Cette fonction
@@ -245,7 +252,8 @@ def add_row_before_button_clicked():
 def add_row_after_button_clicked():
     global current_sheet, current_header_mat
     row = working_selected_cell.r
-    current_sheet.insert(row, ['']*len(current_header_mat))
+    #current_sheet.insert(row, ['']*len(current_header_mat))
+    current_sheet = create_new_row(current_sheet, row+1)
     update_table_html(current_sheet, True)
     
 
