@@ -5,7 +5,8 @@ import spreadsheet
 import codeboot
 from pymsgbox import prompt
 from pymsgbox import alert
-from spreadsheet import matrices, update_cell, save_data, csvtxt_to_data, create_empty_data_header, create_empty_data, create_new_row
+from spreadsheet import matrices, update_cell, save_data, csvtxt_to_data, create_empty_data_header, create_empty_data, create_new_row, delete_row
+from spreadsheet import delete_column, delete_header_column
 from codeboot import write_file
 
 
@@ -208,6 +209,7 @@ def cell_editor_pressed(event):
 # créer une nouvelle table vide et l'afficher dans l'interface graphique. Une 
 # table vide contient par définitions 20 colonnes et 40 lignes.
 def new_sheet_button_clicked():
+    global current_sheet
     current_sheet = create_empty_data(40,20)
     update_table_html(current_sheet, False)
     document.querySelector('#file-name').innerHTML = 'Aucun fichier chargé'
@@ -243,6 +245,8 @@ def save_sheet_button_clicked():
 def add_row_before_button_clicked():
     global current_sheet, current_header_mat
     row = working_selected_cell.r
+    if row == -1:
+        alert("Impossible d'ajouter une ligne avant l'entête")
     #current_sheet.insert(row-1, ['']*len(current_header_mat))
     current_sheet = create_new_row(current_sheet, row)
     update_table_html(current_sheet, True)
@@ -270,13 +274,23 @@ def add_column_after_button_clicked():
 # Gère l'évènement de clic sur le bouton "Supprimer ligne". Cette fonction
 # doit supprimer la ligne sélectionnée dans la table.
 def delete_row_button_clicked():
-
-    pass
+    global current_sheet, current_header_mat
+    row = working_selected_cell.r
+    #current_sheet.insert(row, ['']*len(current_header_mat))
+    current_sheet = delete_row(current_sheet, row-1)
+    update_table_html(current_sheet, True)
+    
 
 # Gère l'évènement de clic sur le bouton "Supprimer colonne". Cette fonction
 # doit supprimer la colonne sélectionnée dans la table.
 def delete_column_button_clicked():
-    pass
+    global current_sheet, current_header_mat
+    col = working_selected_cell.c
+    #current_sheet.insert(row, ['']*len(current_header_mat))
+    current_sheet = delete_column(current_sheet, col-1)
+    current_header_mat = delete_header_column(current_header_mat, col-1)
+    update_table_html(current_sheet, True)
+    
 
 # Gère l'évènement de clic sur le bouton "Somme". Cette fonction soit calculer
 # la somme des valeurs numériques dans toutes les colonnes et afficher le 
