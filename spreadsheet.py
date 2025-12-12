@@ -34,9 +34,28 @@ def save_data(data, file_path):
 # Convertit le texte CSV csvtext en une structure de données qui représente la 
 # table.
 def csvtxt_to_data(csvtext):
-    lines = csvtext.split('\r\n')     # seulement nécessaire pour moi que je travaille avec windows, mette \n pour unix
-    if lines[-1] == '' : lines.pop()
-    return lines
+    def csvtxt_to_data(csvtext):
+    lines = csvtext.split("\n")     # seulement nécessaire pour moi que je travaille avec windows, mette \n pour unix
+    if lines[-1] == "" : lines.pop()
+    if not lines:                 # si lines/csvtext entré est vide
+        return [],[]
+    header = lines[0].split(",")
+    data = [] 
+    for line in lines[1:]:
+        val = line.split(",")    # liste de toutes ligne
+        row_i = []          
+   # conversion des données nombres     
+        for i in val:
+            try:
+                row_i.append(int(i))
+            except:
+                try:
+                    row_i.append(float(i))
+                except: 
+                    row_i.append(i)    
+        data.append(row_i)
+        print(header)
+    return header, data
 
 # Crée et retourne un tableau de textes du format 'colonne x' oû x est le 
 # numéro de la colonne pour num_cols (int) colonnes (avec 1 = la première 
