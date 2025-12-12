@@ -8,25 +8,25 @@ def tests_unitaires():
     # csvtxt_to_data(csvtext)
     # converts cvs line of text to header table and data tables
     
-        cvstext = "A,B,C\n1,2,3\n4,5,6\n"
-        header, data = csvtxt_to_data(csvtext)
-        assert header == ["A","B","C"]
-        assert data == [[1,2,3],[4,5,6]]   #
-        
-        cvstext = "Catastrophy, Reported, On, February, Third\n11,8,2,8\n"
-        header, data = csvtxt_to_data(csvtext)
-        assert header == ["Catastrophy","Reported", "On","February"," Third"]  
-        assert data == [[11,8,2,8]]
-        
-        cvstext = "Name, Author\n Aeneid, Virgil\n Innocence, Koontz"
-        header, data = csvtxt_to_data(csvtext)
-        assert header == ["Name"," Author"]
-        assert data == [["Aeneid", "Virgil"], ["Innocence", "Koontz"]]
-        
-        cvstext = "x,y\n350,500\n14,30\n6,90"
-        header, data = csvtxt_to_data(csvtext)
-        assert header == ["x", "y"]
-        assert data == [350, 500], [14, 30], [6,90]
+       csvtext = "A,B,C\n1,2,3\n4,5,6\n"
+header, data = csvtxt_to_data(csvtext)
+assert header == ["A","B","C"]
+assert data == [[1,2,3],[4,5,6]]   #
+
+csvtext = "Catastrophy, Reported, On, February, Third\n11,8,2,8\n"
+header, data = csvtxt_to_data(csvtext)
+assert header == ["Catastrophy", " Reported", " On", " February", " Third"]  
+assert data == [[11,8,2,8]]
+
+csvtext = "Name, Author\n Aeneid, Virgil\n Innocence, Koontz"
+header, data = csvtxt_to_data(csvtext)
+assert header == ["Name", " Author"]
+assert data == [[" Aeneid", " Virgil"], [" Innocence", " Koontz"]]
+
+csvtext = "x,y\n350,500\n14,30\n6,90"
+header, data = csvtxt_to_data(csvtext)
+assert header == ["x", "y"]
+assert data == [[350, 500], [14, 30], [6,90]]
         
 
     # create_empty_data_header(num_cols):
